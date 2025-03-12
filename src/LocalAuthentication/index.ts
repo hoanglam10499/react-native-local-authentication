@@ -83,7 +83,10 @@ async function isCheckBiometricChange(): Promise<boolean> {
         return false;
     }
 
-    return await checkBiometryChangedAsync();
+    const response: boolean = await checkBiometryChangedAsync();
+
+
+    return response;
 }
 
 export default {
