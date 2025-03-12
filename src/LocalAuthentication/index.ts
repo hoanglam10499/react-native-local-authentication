@@ -8,7 +8,7 @@ import {
     AuthenticateResponse, AuthenticateOptionsAndroid,
 } from './types';
 
-const { isSupportedAsync, isAvailableAsync, getBiometryStatusAsync, biometryType, authenticateAsync: nativeAuthenticateAsync, isReuseAvailable: isReuseAvailableFlag } = LocalAuthenticationNativeModule;
+const { isSupportedAsync, isAvailableAsync, getBiometryStatusAsync, biometryType, authenticateAsync: nativeAuthenticateAsync, isReuseAvailable: isReuseAvailableFlag, checkBiometryChangedAsync } = LocalAuthenticationNativeModule;
 
 /**
  * Get device supported biometry type
@@ -77,6 +77,18 @@ function isReuseAvailable(): boolean {
     return isReuseAvailableFlag;
 }
 
+
+async function isCheckBiometricChange(): Promise<boolean> {
+    if (Platform.OS === 'android') {
+        return false;
+    }
+
+    const response: boolean = await checkBiometryChangedAsync();
+
+
+    return response;
+}
+
 export default {
     isSupportedAsync,
     isAvailableAsync,
@@ -85,4 +97,5 @@ export default {
     authenticateAsync,
     release,
     isReuseAvailable,
+    isCheckBiometricChange
 } as LocalAuthenticationInterface;

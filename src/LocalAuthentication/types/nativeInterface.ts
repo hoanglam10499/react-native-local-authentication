@@ -47,6 +47,8 @@ export interface LocalAuthenticationNativeModuleIOS extends LocalAuthenticationN
      * Flag that indicates whether reuse is available with Touch ID
      */
     isReuseAvailable: boolean;
+
+    checkBiometryChangedAsync:() => Promise<boolean>;
 }
 
 export type LocalAuthenticationNativeModule = LocalAuthenticationNativeModuleIOS & LocalAuthenticationNativeModuleAndroid;
