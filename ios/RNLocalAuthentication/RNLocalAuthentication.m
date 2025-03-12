@@ -277,4 +277,41 @@ RCT_EXPORT_METHOD(authenticateAsync:(NSDictionary *)options
     return @{ @"biometryType": [NSNumber numberWithInteger:[self biometryType]], @"isReuseAvailable":[NSNumber numberWithBool:isReuseAvailable] };
 }
 
+RCT_EXPORT_METHOD(checkBiometryChangedAsync:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    LAContext *context = [LAContext new];
+    NSError *error = nil;
+    // Kiểm tra xem thiết bị có hỗ trợ sinh trắc học không
+    BOOL isAvailable = [context canEvaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics error:&error];
+    if (!isAvailable || error != nil) {
+        NSString *errorDescription = [self convertErrorCode:error];
+        if (errorDescription != nil) {
+            resolve(@{@"changed": @(NO), @"error": errorDescription});
+        } else {
+            resolve(@{@"changed": @(NO), @"error": [NSString stringWithFormat:@"%ld - %@", (long)error.code, error.localizedDescription]});
+        }
+        return;
+    }
+    // Lấy trạng thái hiện tại của dữ liệu sinh trắc học
+    NSData *currentDomainState = context.evaluatedPolicyDomainState;
+    if (currentDomainState == nil) {
+        resolve(@{@"changed": @(NO), @"error": @"Unable to retrieve biometry state"});
+        return;
+    }
+    // Lưu trữ trạng thái trước đó (nếu có) trong một biến tĩnh hoặc NSUserDefaults
+    static NSData *lastDomainState = nil;
+    BOOL hasChanged = NO;
+    if (lastDomainState != nil) {
+        // So sánh trạng thái hiện tại với trạng thái trước đó
+        hasChanged = ![currentDomainState isEqualToData:lastDomainState];
+    }
+    // Cập nhật trạng thái trước đó
+    lastDomainState = [currentDomainState copy];
+    // Trả về kết quả
+    resolve(@{
+        @"changed": @(hasChanged),
+        @"error": [NSNull null]
+    });
+}
+
 @end
